@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1a1410">
+<title>Сакура · Шафран — Чистополь</title>
+<meta name="description" content="Сакура — суши-бар, Ленина 51. Шафран — кафе, Бебеля 116. Чистополь.">
+<meta property="og:title" content="Сакура · Шафран — Чистополь">
+<meta property="og:description" content="Два заведения. Одно нажатие.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' fill='%23d98a8a'>桜</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:          oklch(0.135 0.015 40);
+    --bg-2:        oklch(0.165 0.02 40);
+    --ink:         oklch(0.94 0.01 80);
+    --ash:         oklch(0.62 0.012 70);
+    --line:        oklch(0.94 0.01 80 / 0.09);
+    --sakura:      oklch(0.74 0.12 12);
+    --sakura-glow: oklch(0.74 0.12 12 / 0.14);
+    --saffron:     oklch(0.81 0.16 78);
+    --saffron-glow:oklch(0.81 0.16 78 / 0.14);
+
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-io: cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  html, body { min-height: 100%; }
+
+  body {
+    font-family: "Inter Tight", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "ss01", "cv01";
+    line-height: 1.5;
+    display: flex;
+    flex-direction: column;
+    -webkit-tap-highlight-color: transparent;
+    padding:
+      env(safe-area-inset-top)
+      env(safe-area-inset-right)
+      env(safe-area-inset-bottom)
+      env(safe-area-inset-left);
+  }
+
+  /* ---------- Фон ---------- */
+  .aura {
+    position: fixed;
+    inset: -20%;
+    z-index: -2;
+    background:
+      radial-gradient(45% 40% at 18% 22%, var(--sakura-glow), transparent 72%),
+      radial-gradient(50% 42% at 82% 74%, var(--saffron-glow), transparent 72%);
+    filter: blur(90px);
+    animation: drift 26s var(--ease-io) infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes drift {
+    0%   { transform: translate3d(0,0,0) scale(1); }
+    50%  { transform: translate3d(-2%, 1.5%, 0) scale(1.08); }
+    100% { transform: translate3d(2%, -1.5%, 0) scale(1.14); }
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0.10;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- Курсор ---------- */
+  .cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--ink);
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate3d(-100px, -100px, 0);
+    transition: opacity 0.3s;
+    mix-blend-mode: difference;
+    opacity: 0;
+    will-change: transform;
+  }
+  .cursor.is-on { opacity: 1; }
+  @media (hover: hover) and (pointer: fine) {
+    body.has-cursor,
+    body.has-cursor * { cursor: none !important; }
+  }
+
+  /* ---------- Шапка ---------- */
+  .nav {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem clamp(1.25rem, 4vw, 3rem);
+    position: relative;
+    z-index: 10;
+  }
+  .nav__kanji {
+    font-family: "Noto Serif JP", serif;
+    font-size: 1.5rem;
+    color: var(--sakura);
+    line-height: 1;
+    user-select: none;
+  }
+
+  /* ---------- Сцена ---------- */
+  .stage {
+    flex: 1;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding:
+      clamp(2rem, 6vh, 5rem)
+      clamp(1.25rem, 4vw, 3rem)
+      2rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 6vh, 4rem);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero { text-align: center; }
+
+  .hero__title {
+    font-family: "Instrument Serif", serif;
+    font-weight: 400;
+    font-size: clamp(3.4rem, 13vw, 9rem);
+    line-height: 0.94;
+    letter-spacing: -0.03em;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    column-gap: 0.28em;
+    row-gap: 0.05em;
+  }
+  .hero__word {
+    display: inline-block;
+    opacity: 0;
+    animation: rise 1s var(--ease) forwards;
+  }
+  .hero__word--sakura {
+    color: var(--sakura);
+    animation-delay: 0.15s;
+    text-shadow: 0 0 40px oklch(0.74 0.12 12 / 0.25);
+  }
+  .hero__word--shafran {
+    color: var(--saffron);
+    animation-delay: 0.3s;
+    text-shadow: 0 0 40px oklch(0.81 0.16 78 / 0.22);
+  }
+  .hero__dot {
+    font-style: italic;
+    color: var(--ink);
+    opacity: 0;
+    animation: rise 1s var(--ease) 0.22s forwards;
+    transform: translateY(0.05em);
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(0.35em); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- Карточки ---------- */
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  @media (min-width: 760px) {
+    .cards { grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+  }
+
+  .card {
+    --accent: var(--sakura);
+    --accent-glow: var(--sakura-glow);
+    position: relative;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+    border: 1px solid var(--line);
+    border-radius: 1.5rem;
+    background: color-mix(in oklab, var(--ink) 3.5%, transparent);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+      border-color 0.6s var(--ease),
+      transform 0.6s var(--ease),
+      background 0.6s var(--ease);
+    opacity: 0;
+    animation: cardIn 1s var(--ease) forwards;
+  }
+  .card--sakura  { animation-delay: 0.55s; }
+  .card--shafran { animation-delay: 0.7s; }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card--sakura  { --accent: var(--sakura);  --accent-glow: var(--sakura-glow); }
+  .card--shafran { --accent: var(--saffron); --accent-glow: var(--saffron-glow); }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(90% 55% at 50% 0%, var(--accent-glow), transparent 68%);
+    opacity: 0;
+    transition: opacity 0.7s var(--ease);
+    pointer-events: none;
+    z-index: -1;
+  }
+  .card:hover { border-color: color-mix(in oklab, var(--accent) 30%, transparent); }
+  .card:hover::before { opacity: 1; }
+
+  .card__kanji {
+    position: absolute;
+    top: 0.75rem;
+    right: 1.25rem;
+    font-family: "Noto Serif JP", serif;
+    font-size: clamp(5rem, 12vw, 8.5rem);
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.14;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    z-index: -1;
+  }
+  .card:hover .card__kanji {
+    opacity: 0.32;
+    transform: translateY(-4px) rotate(-2deg);
+  }
+
+  .card__head { position: relative; z-index: 1; }
+  .card__name {
+    font-family: "Instrument Serif", serif;
+    font-weight: 400;
+    font-size: clamp(2.25rem, 5vw, 3rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .card__tag {
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .card__address {
+    margin-top: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.9rem;
+    font-size: 0.88rem;
+    color: var(--ash);
+    align-items: center;
+  }
+  .card__sep {
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  .card__links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin-top: 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .link-row {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr 1.5rem;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.95rem;
+    background: color-mix(in oklab, var(--ink) 4%, transparent);
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      background 0.4s var(--ease),
+      border-color 0.4s var(--ease),
+      transform 0.4s var(--ease);
+    will-change: transform;
+  }
+  .link-row:hover {
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+    border-color: color-mix(in oklab, var(--accent) 28%, transparent);
+    transform: translateX(4px);
+  }
+  .link-row:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .link-row__icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: grid;
+    place-items: center;
+    border-radius: 0.7rem;
+    background: color-mix(in oklab, var(--accent) 14%, transparent);
+    color: var(--accent);
+    transition: background 0.4s var(--ease);
+  }
+  .link-row:hover .link-row__icon {
+    background: color-mix(in oklab, var(--accent) 22%, transparent);
+  }
+  .link-row__icon svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    display: block;
+  }
+  .link-row__icon svg.stroke {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .link-row__icon svg.fill {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .link-row__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+  .link-row__title {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  .link-row__meta {
+    font-size: 0.75rem;
+    color: var(--ash);
+    letter-spacing: 0.02em;
+  }
+
+  .link-row__arrow {
+    display: grid;
+    place-items: center;
+    color: var(--ash);
+    font-size: 1.05rem;
+    transition: color 0.4s var(--ease), transform 0.4s var(--ease);
+  }
+  .link-row:hover .link-row__arrow {
+    color: var(--accent);
+    transform: translate(2px, -2px);
+  }
+
+  /* ---------- Футер ---------- */
+  .foot {
+    margin-top: auto;
+    padding: 2rem clamp(1.25rem, 4vw, 3rem);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--line);
+    font-size: 0.82rem;
+    color: var(--ash);
+    opacity: 0;
+    animation: rise 1s var(--ease) 0.9s forwards;
+  }
+  .foot__link {
+    color: var(--ink);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.55rem 0.95rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    transition: all 0.4s var(--ease);
+  }
+  .foot__link:hover {
+    border-color: color-mix(in oklab, var(--saffron) 40%, transparent);
+    color: var(--saffron);
+    transform: translateY(-1px);
+  }
+  .foot__meta { letter-spacing: 0.05em; }
+
+  /* =========================================================
+     МОБИЛЬНАЯ ВЕРСИЯ (≤ 640px)
+     ========================================================= */
+  @media (max-width: 640px) {
+
+    .nav {
+      padding: 1.1rem 1.25rem;
+    }
+    .nav__kanji {
+      font-size: 1.3rem;
+    }
+
+    .stage {
+      padding: 1rem 1.1rem 1.5rem;
+      gap: 1.75rem;
+    }
+
+    /* --- HERO --- */
+    .hero {
+      padding: 0.25rem 0 0;
+    }
+    .hero__title {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      column-gap: 0;
+      row-gap: 0;
+      font-size: clamp(3rem, 16vw, 4.5rem);
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+    }
+    .hero__dot {
+      display: none;
+    }
+    .hero__word {
+      display: block;
+    }
+
+    /* --- Карточки --- */
+    .card {
+      padding: 1.35rem 1.25rem 1.25rem;
+      border-radius: 1.35rem;
+    }
+    .card__name {
+      font-size: 2.25rem;
+    }
+    .card__tag {
+      font-size: 0.72rem;
+      margin-top: 0.3rem;
+    }
+
+    /* Канзи Сакуры — один знак, крупный */
+    .card--sakura .card__kanji {
+      font-size: 3.75rem;
+      top: 0.55rem;
+      right: 0.9rem;
+      opacity: 0.12;
+    }
+
+    /* Канзи Шафрана — три знака, маленькая печать в углу */
+    .card--shafran .card__kanji {
+      font-size: 1.9rem;
+      top: 0.85rem;
+      right: 0.9rem;
+      letter-spacing: -0.04em;
+      opacity: 0.20;
+    }
+
+    .card:hover .card__kanji {
+      opacity: 0.20;
+      transform: none;
+    }
+
+    .card__address {
+      margin-top: 0.95rem;
+      font-size: 0.85rem;
+    }
+
+    .card__links {
+      margin-top: 1.15rem;
+      gap: 0.45rem;
+    }
+
+    /* Строки ссылок */
+    .link-row {
+      grid-template-columns: 2.25rem 1fr 1.35rem;
+      gap: 0.7rem;
+      padding: 0.7rem 0.8rem;
+      border-radius: 0.85rem;
+    }
+    .link-row__icon {
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 0.6rem;
+    }
+    .link-row__icon svg {
+      width: 1.05rem;
+      height: 1.05rem;
+    }
+    .link-row__title {
+      font-size: 0.9rem;
+    }
+    .link-row__meta {
+      font-size: 0.72rem;
+    }
+    .link-row__arrow {
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+    .link-row:hover { transform: none; }
+    .link-row:active {
+      background: color-mix(in oklab, var(--accent) 18%, transparent);
+      border-color: color-mix(in oklab, var(--accent) 40%, transparent);
+      transform: scale(0.97);
+      transition-duration: 0.08s;
+    }
+
+    .foot {
+      padding: 1.5rem 1.25rem;
+      font-size: 0.78rem;
+      gap: 0.75rem;
+    }
+    .foot__link {
+      padding: 0.5rem 0.85rem;
+      font-size: 0.82rem;
+    }
+    .foot__link:active {
+      background: color-mix(in oklab, var(--saffron) 12%, transparent);
+      border-color: color-mix(in oklab, var(--saffron) 45%, transparent);
+      color: var(--saffron);
+      transform: scale(0.96);
+      transition-duration: 0.08s;
+    }
+  }
+
+  /* ---------- Reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+    .aura { animation: none; }
+    .hero__word, .hero__dot, .card, .foot {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="aura" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="nav">
+    <span class="nav__kanji" aria-hidden="true">桜</span>
+  </header>
+
+  <main class="stage">
+
+    <section class="hero">
+      <h1 class="hero__title">
+        <span class="hero__word hero__word--sakura">Сакура</span>
+        <span class="hero__dot" aria-hidden="true">·</span>
+        <span class="hero__word hero__word--shafran">Шафран</span>
+      </h1>
+    </section>
+
+    <section class="cards" aria-label="Заведения">
+
+      <!-- ===== САКУРА ===== -->
+      <article class="card card--sakura">
+        <span class="card__kanji" aria-hidden="true">桜</span>
+
+        <header class="card__head">
+          <h2 class="card__name">Сакура</h2>
+          <p class="card__tag">Суши-бар</p>
+        </header>
+
+        <p class="card__address">
+          <span>ул. Ленина, 51</span>
+        </p>
+
+        <ul class="card__links">
+          <li>
+            <a class="link-row" href="https://play.google.com/store/apps/details?id=ru.FoodSoul.ChistopolSakura" target="_blank" rel="noopener">
+              <span class="link-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="fill" aria-hidden="true">
+                  <path d="M3.61 1.814 13.79 12 3.61 22.186A1 1 0 0 1 3 21.266V2.734a1 1 0 0 1 .61-.92zm10.89 10.892 2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198 2.807 1.626a1 1 0 0 1 0 1.732l-2.808 1.626L15.203 12l2.495-2.492zM5.864 2.658 16.8 8.99l-2.302 2.302-8.634-8.634z"/>
+                </svg>
+              </span>
+              <span class="link-row__text">
+                <span class="link-row__title">Приложение для Android</span>
+                <span class="link-row__meta">Google Play</span>
+              </span>
+              <span class="link-row__arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a class="link-row" href="https://itunes.apple.com/ru/app/сакура-чистополь/id1210986272" target="_blank" rel="noopener">
+              <span class="link-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="fill" aria-hidden="true">
+                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                </svg>
+              </span>
+              <span class="link-row__text">
+                <span class="link-row__title">Приложение для iPhone</span>
+                <span class="link-row__meta">App Store</span>
+              </span>
+              <span class="link-row__arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a class="link-row" href="https://vk.ru/app5954370_-18936080" target="_blank" rel="noopener">
+              <span class="link-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="stroke" aria-hidden="true">
+                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                  <path d="M3 6h18"/>
+                  <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+              </span>
+              <span class="link-row__text">
+                <span class="link-row__title">Заказать онлайн</span>
+                <span class="link-row__meta">ВКонтакте</span>
+              </span>
+              <span class="link-row__arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a class="link-row" href="tel:+79310092929">
+              <span class="link-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="stroke" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </span>
+              <span class="link-row__text">
+                <span class="link-row__title">Позвонить</span>
+                <span class="link-row__meta">+7 931 009-29-29</span>
+              </span>
+              <span class="link-row__arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+        </ul>
+      </article>
+
+      <!-- ===== ШАФРАН ===== -->
+      <article class="card card--shafran">
+        <span class="card__kanji" aria-hidden="true">番紅花</span>
+
+        <header class="card__head">
+          <h2 class="card__name">Шафран</h2>
+          <p class="card__tag">Кафе</p>
+        </header>
+
+        <p class="card__address">
+          <span>ул. Бебеля, 116</span>
+        </p>
+
+        <ul class="card__links">
+          <li>
+            <a class="link-row" href="https://play.google.com/store/apps/details?id=ru.FoodSoul.ChistopolShafran" target="_blank" rel="noopener">
+              <span class="link-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="fill" aria-hidden="true">
+                  <path d="M3.61 1.814 13.79 12 3.61 22.186A1 1 0 0 1 3 21.266V2.734a1 1 0 0 1 .61-.92zm10.89 10.892 2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198 2.807 1.626a1 1 0 0 1 0 1.732l-2.808 1.626L15.203 12l2.495-2.492zM5.864 2.658 16.8 8.99l-2.302 2.302-8.634-8.634z"/>
+                </svg>
+              </span>
+              <span class="link-row__text">
+                <span class="link-row__title">Приложение для Android</span>
+                <span class="link-row__meta">Google Play</span>
+              </span>
+              <span class="link-row__arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a class="link-row" href="https://itunes.apple.com/ru/app/шафран-чистополь/id1211130879?mt=8" target="_blank" rel="noopener">
+              <span class="link-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="fill" aria-hidden="true">
+                  <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                </svg>
+              </span>
+              <span class="link-row__text">
+                <span class="link-row__title">Приложение для iPhone</span>
+                <span class="link-row__meta">App Store</span>
+              </span>
+              <span class="link-row__arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a class="link-row" href="https://vk.com/app5954370_-59670264" target="_blank" rel="noopener">
+              <span class="link-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="stroke" aria-hidden="true">
+                  <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                  <path d="M3 6h18"/>
+                  <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+              </span>
+              <span class="link-row__text">
+                <span class="link-row__title">Заказать онлайн</span>
+                <span class="link-row__meta">ВКонтакте</span>
+              </span>
+              <span class="link-row__arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a class="link-row" href="https://vk.ru/app5954370_-18936080" target="_blank" rel="noopener">
+              <span class="link-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="stroke" aria-hidden="true">
+                  <path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>
+                </svg>
+              </span>
+              <span class="link-row__text">
+                <span class="link-row__title">Банкетный зал</span>
+                <span class="link-row__meta">бронирование</span>
+              </span>
+              <span class="link-row__arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+          <li>
+            <a class="link-row" href="tel:+79310096084">
+              <span class="link-row__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" class="stroke" aria-hidden="true">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </span>
+              <span class="link-row__text">
+                <span class="link-row__title">Позвонить</span>
+                <span class="link-row__meta">+7 931 009-60-84</span>
+              </span>
+              <span class="link-row__arrow" aria-hidden="true">↗</span>
+            </a>
+          </li>
+        </ul>
+      </article>
+
+    </section>
+  </main>
+
+  <footer class="foot">
+    <a class="foot__link" href="https://disk.yandex.ru/d/NGlsJUtork1cQQ" target="_blank" rel="noopener">
+      Фотографии гостей <span aria-hidden="true">↗</span>
+    </a>
+    <p class="foot__meta">© <span id="year">2026</span> · Чистополь</p>
+  </footer>
+
+  <div class="cursor" aria-hidden="true"></div>
+
+<script>
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  (function () {
+    const fine    = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!fine || reduced) return;
+
+    document.body.classList.add("has-cursor");
+    const cursor = document.querySelector(".cursor");
+
+    let mx = innerWidth / 2, my = innerHeight / 2;
+    let cx = mx, cy = my;
+
+    window.addEventListener("mousemove", (e) => {
+      mx = e.clientX;
+      my = e.clientY;
+      cursor.classList.add("is-on");
+    }, { passive: true });
+
+    document.addEventListener("mouseleave", () => cursor.classList.remove("is-on"));
+
+    (function loop() {
+      cx += (mx - cx) * 0.18;
+      cy += (my - cy) * 0.18;
+      cursor.style.transform = `translate3d(${cx}px, ${cy}px, 0) translate(-50%, -50%)`;
+      requestAnimationFrame(loop);
+    })();
+  })();
+</script>
+</body>
+</html>
